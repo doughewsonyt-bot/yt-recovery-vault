@@ -1,0 +1,41 @@
+name: Channel Recovery Vault Backup
+
+on:
+  schedule:
+    # Runs every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  run-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install google-api-python-client google-auth-oauthlib google-auth-httplib2
+
+      - name: Execute Backup & Dispatch
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          RECOVERY_ALERT_EMAIL: ${{ secrets.RECOVERY_ALERT_EMAIL }}
+          VAULT_ADSENSE_PUB_ID: ${{ secrets.VAULT_ADSENSE_PUB_ID }}
+          VAULT_ADSENSE_EMAIL: ${{ secrets.VAULT_ADSENSE_EMAIL }}
+          VAULT_BRAND_ACCOUNT_ID: ${{ secrets.VAULT_BRAND_ACCOUNT_ID }}
+          VAULT_PRIMARY_ISP_CITY: ${{ secrets.VAULT_PRIMARY_ISP_CITY }}
+        run: |
+          python backup_vault.py
